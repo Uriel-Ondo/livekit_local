@@ -1,0 +1,85 @@
+
+services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server /etc/redis.conf
+    restart: unless-stopped
+    volumes:
+      - ./redis.conf:/etc/redis.conf
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+    depends_on:
+      - redis
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - "7880:7880"       # API HTTP
+      - "7881:7881"       # RTC TCP
+      - "50000-50010:50000-50010/udp"  # RTC UDP range réduit
+
+  egress:
+    image: livekit/egress:latest
+    restart: unless-stopped
+    environment:
+      - EGRESS_CONFIG_FILE=/etc/egress.yaml
+    volumes:
+      - ./egress.yaml:/etc/egress.yaml
+      - ./data:/data
+    depends_on:
+      - livekit
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - "7882:7882"   # health port optionnel
+
+  ingress:
+    image: livekit/ingress:latest
+    restart: unless-stopped
+    environment:
+      - INGRESS_CONFIG_FILE=/etc/ingress.yaml
+    volumes:
+      - ./ingress.yaml:/etc/ingress.yaml
+    depends_on:
+      - livekit
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - "1935:1935"   # RTMP
+      - "8080:8080"   # WHIP
+      - "7884:7884"   # Health
+
+  sip:
+    image: livekit/sip:latest
+    command: --config /etc/sip.yaml
+    restart: unless-stopped
+    volumes:
+      - ./sip.yaml:/etc/sip.yaml
+    depends_on:
+      - livekit
+      - redis
+    environment:
+      - SIP_CONFIG_FILE=/etc/sip.yaml
+    ports:
+      - "5060:5060/udp"   # SIP
+      - "8081:8081"       # Health
+
+  caddy:
+    image: livekit/caddyl4
+    command: run --config /etc/caddy.yaml --adapter yaml
+    restart: unless-stopped
+    volumes:
+      - ./caddy.yaml:/etc/caddy.yaml
+      - ./data:/data
+    ports:
+      - "8085:8085"   # HTTP local pour HLS
+
+volumes:
+  redis_data:

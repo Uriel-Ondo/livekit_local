@@ -1,0 +1,39 @@
+logging:
+  logs:
+    default:
+      level: INFO
+
+apps:
+  http:
+    servers:
+      main:
+        listen: [":8085"]
+        routes:
+          - match:
+              - path: ["/hls/*"]
+            handle:
+              - handler: headers
+                response:
+                  set:
+                    Access-Control-Allow-Origin: ["*"]
+                    Access-Control-Allow-Methods: ["GET, HEAD, OPTIONS"]
+                    Access-Control-Allow-Headers: ["*"]
+                    Access-Control-Max-Age: ["86400"]
+              - handler: subroute
+                routes:
+                  - match:
+                      - method: ["OPTIONS"]
+                    handle:
+                      - handler: static_response
+                        headers:
+                          Access-Control-Allow-Origin: ["*"]
+                          Access-Control-Allow-Methods: ["GET, HEAD, OPTIONS"]
+                          Access-Control-Allow-Headers: ["*"]
+                          Access-Control-Max-Age: ["86400"]
+                        body: ""
+                        status_code: 204
+              - handler: rewrite
+                strip_path_prefix: /hls
+              - handler: file_server
+                root: /data/hls
+                pass_thru: true

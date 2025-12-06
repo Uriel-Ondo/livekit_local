@@ -1,0 +1,20 @@
+redis:
+  address: redis:6379
+  db: 0
+  use_tls: false
+
+api_key: devkey
+api_secret: c038c9ded6997a70af0fb2dc979d59fef9cc3ec0251c49c7914e3d0cbf351f3c
+ws_url: ws://livekit:7880
+
+rtmp:
+  port: 1935
+whip:
+  port: 8080
+health_port: 7884
+
+cpu_cost:
+  rtmp: 2.0
+  whip: 2.0
+  whip_bypass_transcoding: 0.1
+  url: 2.0

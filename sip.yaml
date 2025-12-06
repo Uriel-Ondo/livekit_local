@@ -1,0 +1,29 @@
+port: 5060
+bind_address: "0.0.0.0"
+protocol: udp
+
+livekit:
+  ws_url: "ws://livekit:7880"
+  api_key: "devkey"
+  api_secret: "c038c9ded6997a70af0fb2dc979d59fef9cc3ec0251c49c7914e3d0cbf351f3c"
+
+redis:
+  address: "redis:6379"
+  db: 0
+
+allow_ip_ranges:
+  - "127.0.0.1/8"
+  - "192.168.0.0/16"
+  - "172.16.0.0/12"
+
+inbound:
+  auto_accept: true
+  ring_timeout: 10s
+
+trunks:
+  - name: "asterisk"
+    host: "127.0.0.1"
+    port: 5070
+    username: "livekit_inbound"
+    password: "secure_inbound_123"
+    protocol: udp
