@@ -4,8 +4,12 @@ bind_addresses:
 
 rtc:
   tcp_port: 7881
-  port_range_start: 50000
-  port_range_end: 50010   # réduit pour éviter les conflits sur macOS
+
+  # Range modifié pour éviter les conflits macOS
+  # Ancien : 50000–50010 → Conflit avec AnyDesk (port 50001)
+  port_range_start: 50100
+  port_range_end: 50110
+
   use_external_ip: false
   enable_loopback_candidate: true
 
@@ -15,7 +19,7 @@ redis:
   use_tls: false
 
 turn:
-  enabled: false   # inutile en local
+  enabled: false
 
 keys:
   devkey: c038c9ded6997a70af0fb2dc979d59fef9cc3ec0251c49c7914e3d0cbf351f3c
